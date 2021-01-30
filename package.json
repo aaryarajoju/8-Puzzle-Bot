@@ -1,0 +1,23 @@
+{
+  "name": "8-PuzzleBot",
+  "version": "1.0.0",
+  "description": "a Discord Bot to play the sliding 8 Puzzle",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aaryarajoju/8-PuzzleBot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aaryarajoju/8-PuzzleBot/issues"
+  },
+  "homepage": "https://github.com/aaryarajoju/8-PuzzleBot#readme",
+  "dependencies": {
+    "discord.js": "^12.5.1"
+  }
+}
