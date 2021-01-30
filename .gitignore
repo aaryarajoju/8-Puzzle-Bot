@@ -1,0 +1,12 @@
+# NodeJS specific #
+.nyc_output/
+coverage/
+node_modules/
+npm-debug.log
+test/*.log
+
+# dotenv environment variables file
+.env
+.env.test
+
+config.json
