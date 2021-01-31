@@ -4,7 +4,7 @@ const client = new Discord.Client;
 
 var board = [[0,0,0],[0,0,0],[0,0,0]];
 const finishedBoard = [[1,2,3],[4,5,6],[7,8,9]];
-var player;
+var player = undefined;
 
 
 client.once('ready', () => {
@@ -20,35 +20,67 @@ client.once('disconnect', () => {
 
 client.on('message', (receivedMessage) => {
     if (receivedMessage.author == client.user) return;
-    playGameCommand(receivedMessage);
+
+    if (player == undefined) {
+        if (receivedMessage.content.toLowerCase() == '8play') {
+            player = receivedMessage.author.id;
+            newGameCommand(receivedMessage);
+        }
+    } else if (receivedMessage.author.id == player) {
+        playGameCommand(receivedMessage);
+    } else {
+        receivedMessage.channel.send('The game is already being played by <@' + player + '> \nPlease wait');
+    }
 })
 
 
 //TODO
-function playGameCommand(receivedMessage) {
+function newGameCommand(receivedMessage) {
+
+    board = [[0,0,0],[0,0,0],[0,0,0]];
 
     do {
         initBoard();
     } while (!isBoardSolvable())
 
     printBoard(receivedMessage);
+}
+
+//TODO
+function playGameCommand(receivedMessage) {
+
+    var dir;
+
+    if (receivedMessage.content.toLowerCase() == 'up' || receivedMessage.content.toLowerCase() == 'u') {
+        dir = 1;
+    } else if (receivedMessage.content.toLowerCase() == 'down' || receivedMessage.content.toLowerCase() == 'd') {
+        dir = 2;
+    } else if (receivedMessage.content.toLowerCase() == 'right' || receivedMessage.content.toLowerCase() == 'r') {
+        dir = 3;
+    } else if (receivedMessage.content.toLowerCase() == 'left' || receivedMessage.content.toLowerCase() == 'l') {
+        dir = 4;
+    } else {
+        receivedMessage.channel.send('INVALID MOVE');
+    }
 
 }
 
 function initBoard() {
-
+    console.log('initializing');
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
-            console.log(i + ' ' + j);
-            board[i][j] = getUniqueAndRandomNum();
-            console.log(i + ' ' + j);
+            let a = i;
+            let b = j;
+            (board[i][j]) = getUniqueAndRandomNum();
+            i = a;
+            j = b;
         }
     }
 }
 
 //TODO- prints the board
 function printBoard(receivedMessage) {
-
+    console.log('printing');
     let boardToBePrinted =  '| ' + getNum(0, 0) + ' | ' + getNum(0, 1) + ' | ' + getNum(0, 2) + ' |' + '\n' + 
                             '| ' + getNum(1, 0) + ' | ' + getNum(1, 1) + ' | ' + getNum(1, 2) + ' |' + '\n' + 
                             '| ' + getNum(2, 0) + ' | ' + getNum(2, 1) + ' | ' + getNum(2, 2) + ' |';
@@ -76,7 +108,7 @@ function getUniqueAndRandomNum() {
     let x;
 
     do {
-        x = Math.floor(Math.random() * (9 - 1) + 1);
+        x = Math.floor((Math.random() * 9) + 1);
     } while (isAlreadyPresent(x))
     
     return x;
@@ -127,7 +159,7 @@ function findPositionOfNum(x) {
 }
 
 function isBoardSolvable() {
-
+    console.log('checking');
     let arr = [0,0,0,0,0,0,0,0];
     let numOfInversions = 0;
     let a = 0;
