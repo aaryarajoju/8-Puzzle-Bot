@@ -5,7 +5,7 @@ const client = new Discord.Client;
 var board = [[0,0,0],[0,0,0],[0,0,0]];
 const finishedBoard = [[1,2,3],[4,5,6],[7,8,9]];
 var player = undefined;
-
+var numOfSteps = 0;
 
 client.once('ready', () => {
     console.log("The bot is online! Connected as " + client.user.tag);
@@ -196,11 +196,7 @@ function isBoardSolved() {
 
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
-            let a = i;
-            let b = j;
             if (board[i][j] != finishedBoard[i][j]) return false;
-            i = a;
-            j = b;
         }
     }
     return true;
