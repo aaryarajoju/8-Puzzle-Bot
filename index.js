@@ -4,8 +4,18 @@ const client = new Discord.Client;
 
 var board = [[0,0,0],[0,0,0],[0,0,0]];
 const finishedBoard = [[1,2,3],[4,5,6],[7,8,9]];
+
 var player = undefined;
+
 var numOfSteps = 0;
+
+var dir = 0;
+
+const upArrowEmoji = '⬆️';
+const downArrowEmoji = '⬇️';
+const rightArrowEmoji = '➡️';
+const leftArrowEmoji = '⬅️';
+
 
 client.once('ready', () => {
     console.log("The bot is online! Connected as " + client.user.tag);
@@ -33,6 +43,27 @@ client.on('message', (receivedMessage) => {
     }
 })
 
+client.on('messageReactionAdd', async (reaction, user) => {
+    if (user.bot) return;
+    if (user.id != player) return;
+
+    if (reaction.emoji.name === upArrowEmoji) {
+        dir = 1;
+        playGameThroughReactionsCommand(reaction.message);
+    } else if (reaction.emoji.name === downArrowEmoji) {
+        dir = 2;
+        playGameThroughReactionsCommand(reaction.message);
+    } else if (reaction.emoji.name === rightArrowEmoji) {
+        dir = 3;
+        playGameThroughReactionsCommand(reaction.message);
+    } else if (reaction.emoji.name === leftArrowEmoji) {
+        dir = 4;
+        playGameThroughReactionsCommand(reaction.message);
+    } else {
+        reaction.message.channel.send('wrong reaction');
+    }
+})
+
 
 //TODO
 function newGameCommand(receivedMessage) {
@@ -50,7 +81,6 @@ function newGameCommand(receivedMessage) {
 //TODO
 function playGameCommand(receivedMessage) {
 
-    var dir;
     let i, j, num;
 
     if (receivedMessage.content.toLowerCase() == 'up' || receivedMessage.content.toLowerCase() == 'u') {
@@ -126,10 +156,87 @@ function playGameCommand(receivedMessage) {
             break;
     }
 
+    dir = 0;
+
     printBoard(receivedMessage);
 
     if (isBoardSolved()){
         boardSolved(receivedMessage);
+    }
+}
+
+//TODO
+function playGameThroughReactionsCommand(message) {
+
+    let i, j, num;
+
+    positionOfGapI = findPositionOfGap().posI;
+    positionOfGapJ = findPositionOfGap().posJ;
+
+    if (positionOfGapI == 2 && dir == 1) {
+        message.channel.send('INVALID MOVE');
+        printBoard(message);
+        return;
+    }
+    if (positionOfGapI == 0 && dir == 2) {
+        message.channel.send('INVALID MOVE');
+        printBoard(message);
+        return;
+    }
+    if (positionOfGapJ == 0 && dir == 3) {
+        message.channel.send('INVALID MOVE');
+        printBoard(message);
+        return;
+    }
+    if (positionOfGapJ == 2 && dir == 4) {
+        message.channel.send('INVALID MOVE');
+        printBoard(message);
+        return;
+    }
+
+    switch (dir) {
+        case 1:
+            i = positionOfGapI + 1;
+            j = positionOfGapJ;
+            num = getNum(i, j);
+            board[positionOfGapI][positionOfGapJ] = num.toString();
+            board[i][j] = 9;
+            break;
+        
+        case 2:
+            i = positionOfGapI - 1;
+            j = positionOfGapJ;
+            num = getNum(i, j);
+            board[positionOfGapI][positionOfGapJ] = num.toString();
+            board[i][j] = 9;
+            break;
+
+        case 3:
+            i = positionOfGapI;
+            j = positionOfGapJ - 1;
+            num = getNum(i, j);
+            board[positionOfGapI][positionOfGapJ] = num.toString();
+            board[i][j] = 9;
+            break;
+
+        case 4:
+            i = positionOfGapI;
+            j = positionOfGapJ + 1;
+            num = getNum(i, j);
+            board[positionOfGapI][positionOfGapJ] = num.toString();
+            board[i][j] = 9;
+            break;
+    
+        default:
+            break;
+    }
+
+    dir = 0;
+
+    printBoard(message);
+
+    if (isBoardSolved()){
+        boardSolved(message);
     }
 }
 
@@ -146,7 +253,8 @@ function initBoard() {
 }
 
 //TODO- prints the board
-function printBoard(receivedMessage) {
+async function printBoard(receivedMessage) {
+
     let boardToBePrinted =  '| ' + getNum(0, 0) + ' | ' + getNum(0, 1) + ' | ' + getNum(0, 2) + ' |' + '\n' + 
                             '| ' + getNum(1, 0) + ' | ' + getNum(1, 1) + ' | ' + getNum(1, 2) + ' |' + '\n' + 
                             '| ' + getNum(2, 0) + ' | ' + getNum(2, 1) + ' | ' + getNum(2, 2) + ' |';
@@ -155,7 +263,12 @@ function printBoard(receivedMessage) {
         .setColor('#000000')
         .setDescription(boardToBePrinted);
 
-    receivedMessage.channel.send(embededBoard);
+    let msg = await receivedMessage.channel.send(embededBoard);
+
+    msg.react(upArrowEmoji);
+    msg.react(downArrowEmoji);
+    msg.react(rightArrowEmoji);
+    msg.react(leftArrowEmoji);
 
 }
 
@@ -254,7 +367,10 @@ function isBoardSolvable() {
 //TODO- print that the board is solved and the game has ended
 function boardSolved(receivedMessage) {
     receivedMessage.channel.send('completed');
+    board = [[0,0,0],[0,0,0],[0,0,0]];
     player = undefined;
+    numOfSteps = 0;
+    dir = 0;
 }
 
 
