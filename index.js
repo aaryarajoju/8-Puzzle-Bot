@@ -37,6 +37,7 @@ client.on('message', (receivedMessage) => {
 //TODO
 function newGameCommand(receivedMessage) {
 
+    receivedMessage.channel.send('new game');
     board = [[0,0,0],[0,0,0],[0,0,0]];
 
     do {
@@ -50,6 +51,7 @@ function newGameCommand(receivedMessage) {
 function playGameCommand(receivedMessage) {
 
     var dir;
+    let i, j, num;
 
     if (receivedMessage.content.toLowerCase() == 'up' || receivedMessage.content.toLowerCase() == 'u') {
         dir = 1;
@@ -63,10 +65,75 @@ function playGameCommand(receivedMessage) {
         receivedMessage.channel.send('INVALID MOVE');
     }
 
+    positionOfGapI = findPositionOfGap().posI;
+    positionOfGapJ = findPositionOfGap().posJ;
+
+    if (positionOfGapI == 2 && dir == 1) {
+        receivedMessage.channel.send('INVALID MOVE');
+        printBoard(receivedMessage);
+        return;
+    }
+    if (positionOfGapI == 0 && dir == 2) {
+        receivedMessage.channel.send('INVALID MOVE');
+        printBoard(receivedMessage);
+        return;
+    }
+    if (positionOfGapJ == 0 && dir == 3) {
+        receivedMessage.channel.send('INVALID MOVE');
+        printBoard(receivedMessage);
+        return;
+    }
+    if (positionOfGapJ == 2 && dir == 4) {
+        receivedMessage.channel.send('INVALID MOVE');
+        printBoard(receivedMessage);
+        return;
+    }
+
+    switch (dir) {
+        case 1:
+            i = positionOfGapI + 1;
+            j = positionOfGapJ;
+            num = getNum(i, j);
+            board[positionOfGapI][positionOfGapJ] = num.toString();
+            board[i][j] = 9;
+            break;
+        
+        case 2:
+            i = positionOfGapI - 1;
+            j = positionOfGapJ;
+            num = getNum(i, j);
+            board[positionOfGapI][positionOfGapJ] = num.toString();
+            board[i][j] = 9;
+            break;
+
+        case 3:
+            i = positionOfGapI;
+            j = positionOfGapJ - 1;
+            num = getNum(i, j);
+            board[positionOfGapI][positionOfGapJ] = num.toString();
+            board[i][j] = 9;
+            break;
+
+        case 4:
+            i = positionOfGapI;
+            j = positionOfGapJ + 1;
+            num = getNum(i, j);
+            board[positionOfGapI][positionOfGapJ] = num.toString();
+            board[i][j] = 9;
+            break;
+    
+        default:
+            break;
+    }
+
+    printBoard(receivedMessage);
+
+    if (isBoardSolved()){
+        boardSolved(receivedMessage);
+    }
 }
 
 function initBoard() {
-    console.log('initializing');
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
             let a = i;
@@ -80,7 +147,6 @@ function initBoard() {
 
 //TODO- prints the board
 function printBoard(receivedMessage) {
-    console.log('printing');
     let boardToBePrinted =  '| ' + getNum(0, 0) + ' | ' + getNum(0, 1) + ' | ' + getNum(0, 2) + ' |' + '\n' + 
                             '| ' + getNum(1, 0) + ' | ' + getNum(1, 1) + ' | ' + getNum(1, 2) + ' |' + '\n' + 
                             '| ' + getNum(2, 0) + ' | ' + getNum(2, 1) + ' | ' + getNum(2, 2) + ' |';
@@ -130,7 +196,11 @@ function isBoardSolved() {
 
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
+            let a = i;
+            let b = j;
             if (board[i][j] != finishedBoard[i][j]) return false;
+            i = a;
+            j = b;
         }
     }
     return true;
@@ -159,7 +229,7 @@ function findPositionOfNum(x) {
 }
 
 function isBoardSolvable() {
-    console.log('checking');
+
     let arr = [0,0,0,0,0,0,0,0];
     let numOfInversions = 0;
     let a = 0;
@@ -188,6 +258,7 @@ function isBoardSolvable() {
 //TODO- print that the board is solved and the game has ended
 function boardSolved(receivedMessage) {
     receivedMessage.channel.send('completed');
+    player = undefined;
 }
 
 
