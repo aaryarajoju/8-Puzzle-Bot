@@ -29,12 +29,19 @@ client.once('disconnect', () => {
 client.on('message', (receivedMessage) => {
     if (receivedMessage.author == client.user) return;
 
+    if (receivedMessage.content.toLowerCase() == '8help') return helpCommand(receivedMessage);
+
+    if (receivedMessage.content.toLowerCase() == '8rules') return rulesCommand(receivedMessage);
+
     if (player == undefined) {
         if (receivedMessage.content.toLowerCase() == '8play') {
             player = receivedMessage.author.id;
             newGameCommand(receivedMessage);
         }
     } else if (receivedMessage.author.id == player) {
+
+        if (receivedMessage.content.toLowerCase() == '8stop') return endGameCommand(receivedMessage);
+
         numOfSteps++;
         playGameCommand(receivedMessage);
     } else {
@@ -70,15 +77,75 @@ client.on('messageReactionAdd', async (reaction, user) => {
         dir = 4;
         playGameThroughReactionsCommand(reaction.message);
     } else {
-        reaction.message.channel.send('wrong reaction').then(msg => {msg.delete({ timeout: 5000 })}).catch();
+        reaction.message.channel.send('wrong reaction').then(msg => {msg.delete({ timeout: 2500 })}).catch();
     }
 })
 
 
+function rulesCommand(receivedMessage) {
+
+    let rulesMessage = new Discord.MessageEmbed()
+    .setColor('#000000')
+    .setTitle('8-Puzzle: RULES')
+    .setAuthor('8-Puzzle Bot', 'https://i.imgur.com/CWJFeUo.png')
+    .setDescription('1. Send `U` or `UP` or react with ⬆️, to move a number UP into the blank\n' + 
+                    '2. Send `D` or `DOWN` or react with ⬇️, to move a number DOWN into the blank\n' + 
+                    '3. Send `R` or `RIGHT` or react with ➡️, to move a number RIGHT into the blank\n' + 
+                    '4. Send `L` or `LEFT` or react with ⬅️, to move a number LEFT into the blank\n' + 
+                    '5. To complete the game, make the board into: \n ' + printFinishedBoard());
+
+    receivedMessage.channel.send(rulesMessage);
+}
+
+function helpCommand(receivedMessage) {
+    let helpMessage = new Discord.MessageEmbed()
+    .setColor('#000000')
+    .setTitle('8-Puzzle')
+    .setAuthor('8-Puzzle Bot', 'https://i.imgur.com/CWJFeUo.png')
+    .setDescription('Hello! I am the 8-Puzzle Bot, made by <@700638629596233739>\n\n' +
+                    'To play the game, type `8play`\n' +
+                    'To stop the game in between, type `8stop`\n' +
+                    'To see the rules, type `8rules`\n' +
+                    '\nAs always, have fun!');
+
+    receivedMessage.channel.send(helpMessage);
+}
+
+function endGameCommand(receivedMessage) {
+    msg.reactions.removeAll().catch(error => console.error('Failed to clear reactions: ', error));
+    
+    receivedMessage.channel.send('Game Ended');
+
+    board = [[0,0,0],[0,0,0],[0,0,0]];
+    player = undefined;
+    msg = undefined;
+    numOfSteps = 0;
+    dir = 0;
+}
+
+function printFinishedBoard() {
+    let finishedPuzzleBoard =   ':one: :two: :three: \n' +
+                                ':four: :five: :six: \n' +
+                                ':seven: :eight: :blue_square:';
+
+    return finishedPuzzleBoard;
+}
+
 //TODO
 function newGameCommand(receivedMessage) {
 
-    receivedMessage.channel.send('new game');
+    let rulesMessage = new Discord.MessageEmbed()
+        .setColor('#000000')
+        .setTitle('8-Puzzle: RULES')
+        .setAuthor('8-Puzzle Bot', 'https://i.imgur.com/CWJFeUo.png')
+        .setDescription('1. Send `U` or `UP` or react with ⬆️, to move a number UP into the blank\n' + 
+                        '2. Send `D` or `DOWN` or react with ⬇️, to move a number DOWN into the blank\n' + 
+                        '3. Send `R` or `RIGHT` or react with ➡️, to move a number RIGHT into the blank\n' + 
+                        '4. Send `L` or `LEFT` or react with ⬅️, to move a number LEFT into the blank\n' + 
+                        '5. To complete the game, make the board into: \n ' + printFinishedBoard());
+
+    receivedMessage.channel.send(rulesMessage);
+
     board = [[0,0,0],[0,0,0],[0,0,0]];
 
     do {
@@ -93,6 +160,8 @@ function playGameCommand(receivedMessage) {
 
     let i, j, num;
 
+    receivedMessage.delete({ timeout: 1000 });
+
     if (receivedMessage.content.toLowerCase() == 'up' || receivedMessage.content.toLowerCase() == 'u') {
         dir = 1;
     } else if (receivedMessage.content.toLowerCase() == 'down' || receivedMessage.content.toLowerCase() == 'd') {
@@ -102,29 +171,29 @@ function playGameCommand(receivedMessage) {
     } else if (receivedMessage.content.toLowerCase() == 'left' || receivedMessage.content.toLowerCase() == 'l') {
         dir = 4;
     } else {
-        receivedMessage.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 5000 })}).catch();
+        receivedMessage.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 2500 })}).catch();
     }
 
     positionOfGapI = findPositionOfGap().posI;
     positionOfGapJ = findPositionOfGap().posJ;
 
     if (positionOfGapI == 2 && dir == 1) {
-        receivedMessage.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 5000 })}).catch();
+        receivedMessage.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 2500 })}).catch();
         printBoard(receivedMessage);
         return;
     }
     if (positionOfGapI == 0 && dir == 2) {
-        receivedMessage.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 5000 })}).catch();
+        receivedMessage.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 2500 })}).catch();
         printBoard(receivedMessage);
         return;
     }
     if (positionOfGapJ == 0 && dir == 3) {
-        receivedMessage.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 5000 })}).catch();
+        receivedMessage.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 2500 })}).catch();
         printBoard(receivedMessage);
         return;
     }
     if (positionOfGapJ == 2 && dir == 4) {
-        receivedMessage.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 5000 })}).catch();
+        receivedMessage.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 2500 })}).catch();
         printBoard(receivedMessage);
         return;
     }
@@ -184,22 +253,22 @@ function playGameThroughReactionsCommand(message) {
     positionOfGapJ = findPositionOfGap().posJ;
 
     if (positionOfGapI == 2 && dir == 1) {
-        message.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 5000 })}).catch();
+        message.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 2500 })}).catch();
         printBoard(message);
         return;
     }
     if (positionOfGapI == 0 && dir == 2) {
-        message.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 5000 })}).catch();
+        message.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 2500 })}).catch();
         printBoard(message);
         return;
     }
     if (positionOfGapJ == 0 && dir == 3) {
-        message.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 5000 })}).catch();
+        message.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 2500 })}).catch();
         printBoard(message);
         return;
     }
     if (positionOfGapJ == 2 && dir == 4) {
-        message.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 5000 })}).catch();
+        message.channel.send('INVALID MOVE').then(msg => {msg.delete({ timeout: 2500 })}).catch();
         printBoard(message);
         return;
     }
@@ -407,10 +476,19 @@ function isBoardSolvable() {
 
 //TODO- print that the board is solved and the game has ended
 function boardSolved(receivedMessage) {
-    receivedMessage.channel.send('completed');
-    receivedMessage.channel.send('num of moves: ' + numOfSteps);
+
+    msg.reactions.removeAll().catch(error => console.error('Failed to clear reactions: ', error));
+    
+    let boardFinishedMessage = new Discord.MessageEmbed()
+    .setColor('#000000')
+    .setTitle('COMPLETED!')
+    .setDescription('Congratuations! You\'ve finished the board, it took you `' + numOfSteps + '` steps to complete.');
+
+    receivedMessage.channel.send(boardFinishedMessage);
+
     board = [[0,0,0],[0,0,0],[0,0,0]];
     player = undefined;
+    msg = undefined;
     numOfSteps = 0;
     dir = 0;
 }
